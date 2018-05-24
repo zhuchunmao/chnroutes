@@ -12,7 +12,7 @@ def generate_ovpn(_):
     results = fetch_ip_data()
 
     upscript_header = """\
-#!/bin/bash -
+#!/bin/sh
 
 export PATH="/bin:/sbin:/usr/sbin:/usr/bin"
 OLDGW=$(ip route show 0/0 | sed -e 's/^default//')
@@ -20,7 +20,7 @@ OLDGW=$(ip route show 0/0 | sed -e 's/^default//')
 ip -batch - <<EOF
 """
     downscript_header = """\
-#!/bin/bash -
+#!/bin/sh
 
 export PATH="/bin:/sbin:/usr/sbin:/usr/bin"
 ip -batch - <<EOF
@@ -33,8 +33,8 @@ ip -batch - <<EOF
     downfile.write(downscript_header)
 
     for ip, _, mask in results:
-        upfile.write('route add %s/%s $OLDGW\n' % (ip, mask))
-        downfile.write('route del %s/%s\n' % (ip, mask))
+        upfile.write('route add %s/%s $OLDGW table 10\n' % (ip, mask))
+        downfile.write('route del %s/%s table 10\n' % (ip, mask))
 
     upfile.write('EOF\n')
     downfile.write('EOF\n')
